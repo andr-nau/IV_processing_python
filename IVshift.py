@@ -29,7 +29,7 @@ rescaleCurrent=1/100/100
 # READ I-V DATA AND DIVIDE TO VOLTAGE AND CURRENT LISTS
 
 # Input file contains 4 columns tab separated: time | voltage | time | current
-filename="iv1"
+filename="iv57"
 with open(filename+".txt","r") as f:
     rawdata = [float(i) for i in f.read().split()]
 
@@ -54,7 +54,7 @@ for i in range(len(current)):
     shift_current.append(current[i]+shiftY)
 
 # Calculate switching current (max current for zero voltage state)
-isw=(abs(max(current))+abs(min(current)))/2
+isw=(abs(max(tempList))+abs(min(tempList)))/2
 
 # Control of Y shift
 print("raw data minY=",min(current),"\nraw data maxY=",max(current),"\nshiftY=",shiftY,"\nSwitching current=", isw)
