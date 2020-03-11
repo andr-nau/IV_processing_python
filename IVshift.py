@@ -7,13 +7,18 @@
 
 import matplotlib.pyplot as plt
 
-zeroPosition=0
+def selectData(minVal, maxVal, dataForCheck, dataForSelect):
+    tempList=[]
+    for i in range(len(dataForCheck)):
+        if dataForCheck[i]>minVal and dataForCheck[i]<maxVal:
+            tempList.append(dataForSelect[i])
+    return tempList
 
+zeroPosition=0
 rawdata=[]
 voltage=[]
 current=[]
 resist=[]
-
 shift_current=[]
 shift_voltage=[]
 
@@ -36,48 +41,40 @@ plt.figure(0)
 plt.plot(voltage, current)
 
 # SHIFT ALONG Y (CURRENT) AXIS.
-
 # Selecting the central part of I-V to find max/min Y values for centering. 
 # Excluding side parts is needed, because they could be higher than central part.
-# left / right borders could be corrected according to Fig1
-tempList=[]
+# Select Current(Y) data using Voltage(X) limits
 leftX = -1e-4
 rightX = 1e-4
-
-for i in range(len(voltage)):
-    if voltage[i]>leftX and voltage[i]<rightX:
-        tempList.append(current[i])
+tempList=selectData(leftX, rightX, voltage, current)
 
 # Shift along Y axis to symmetrical position.
 shiftY=zeroPosition-(max(tempList)+min(tempList))/2
-
 for i in range(len(current)):
     shift_current.append(current[i]+shiftY)
 
 # Calculate switching current (max current for zero voltage state)
 isw=(abs(max(current))+abs(min(current)))/2
 
-# Control output for Y shift
-print("raw data minY=",min(current),"raw data maxY=",max(current),"shiftY=",shiftY,"Switching current=", isw)
+# Control of Y shift
+print("raw data minY=",min(current),"\nraw data maxY=",max(current),"\nshiftY=",shiftY,"\nSwitching current=", isw)
 plt.plot(voltage, shift_current)
 
 # SHIFT ALONG X (VOLTAGE) AXIS.
-
 # Select part of Y-shifted data, that has near zero Y values.
-# Because X shifting is based only on the position of central part of I-V.
-tempList=[]
+# Because X shifting is based only on the position of central vertical I-V line.
+#Select Voltage(X) data using Current(Y) limits
+
 bottomY=-1e-6
 topY=1e-6
-for i in range(len(shift_current)):
-    if shift_current[i]>bottomY and shift_current[i]<topY:
-        tempList.append(voltage[i])
+tempList=selectData(bottomY, topY, shift_current, voltage)
 
 #Shift of X data
 shiftX=zeroPosition-(max(tempList)+min(tempList))/2
-
 for i in range(len(voltage)):
     shift_voltage.append(voltage[i]+shiftX)
 
+#Control of X shift
 print("minX=", min(tempList), "maxX=", max(tempList), "shiftX=", shiftX)
 
 #Final shifted graph
@@ -86,6 +83,8 @@ plt.plot(shift_voltage, shift_current)
 #Resistance calc and plot graph in R-I presentation
 for j in range(len(voltage)):
     resist.append((shift_voltage[j])/(shift_current[j]))
+
+#Resistance vs current graph
 plt.figure(1)
 #plt.axis([-0.00005, 0.00005, -10, 150])
 plt.plot(shift_current, resist)
