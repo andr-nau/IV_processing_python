@@ -43,7 +43,7 @@ plt.plot(voltage, current)
 # SHIFT ALONG Y (CURRENT) AXIS.
 # Selecting the central part of I-V to find max/min Y values for centering. 
 # Excluding side parts is needed, because they could be higher than central part.
-# Select Current(Y) data using Voltage(X) limits
+# Select Current(Y) data using Voltage(X) limits. Limits defined from init graph.
 leftX = -1e-4
 rightX = 1e-4
 tempList=selectData(leftX, rightX, voltage, current)
@@ -80,11 +80,11 @@ print("minX=", min(tempList), "maxX=", max(tempList), "shiftX=", shiftX)
 #Final shifted graph
 plt.plot(shift_voltage, shift_current)
 
-#Resistance calc and plot graph in R-I presentation
+#Resistance calc
 for j in range(len(voltage)):
     resist.append((shift_voltage[j])/(shift_current[j]))
 
-#Resistance vs current graph
+#Resistance vs current graph in Fig1
 plt.figure(1)
 #plt.axis([-0.00005, 0.00005, -10, 150])
 plt.plot(shift_current, resist)
