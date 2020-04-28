@@ -9,4 +9,4 @@ This is version dedicated for Python's IDEs, like Spider (to see graphs and outp
 
 Sample result in graphical form:
 
-![Output figure](https://github.com/andr-nau/IV_processing_python/blob/master/Sample_output_Fig.png "Sample result")
+![Output figure](https://github.com/andr-nau/IV_processing_python/blob/master/Sample_output_Figure.png "Sample result")
