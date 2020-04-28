@@ -7,7 +7,7 @@ Workflow:
 2. transforming I-V to R-I (resistance vs current) presentation.
 3. saving processed data.
 
-@author: Naumov
+@author: A.Naumov
 """
 
 import matplotlib.pyplot as plt
@@ -17,14 +17,16 @@ def selectData(minVal, maxVal, dataForCheck, dataForSelect):
     """
     Function selects part of input data list (arg2), with index corresponding
     to the index of data1 list (arg1) that meet condition
-    minVal < data1 < maxVal. 
+    minVal < data1 < maxVal.
     Then it returns new list.
     """
-    tempList = []
+    tempListSel = []
+    tempListChk = []
     for i in range(len(dataForCheck)):
         if dataForCheck[i] > minVal and dataForCheck[i] < maxVal:
-            tempList.append(dataForSelect[i])
-    return tempList
+            tempListSel.append(dataForSelect[i])
+            tempListChk.append(dataForCheck[i])
+    return tempListSel
 
 
 def shiftData(selectedData, dataForShift):
@@ -42,6 +44,10 @@ def shiftData(selectedData, dataForShift):
 
 
 def readData(filename, rescaleX, rescaleY):
+    """
+    Function reads experimental data file and selects voltage and current.
+    Input file contains 4 columns: time | voltage | time | current
+    """
     with open(filename+".txt", "r") as f:
         rawdata = [float(i) for i in f.read().split()]
     voltage = list(map(lambda x: x*rescaleX, rawdata[1::4]))
@@ -83,114 +89,114 @@ shift_current = []
 shift_voltage = []
 
 rescaleVoltage = 1 / 100        # V1/100 - remove x100 amplification
-rescaleCurrent = 1 / 100 / 100  # remove x100 amplification, current=V2/100Ohm
+rescaleCurrent = 1 / 100 / 100  # remove x100 amplification, current=V2/100 Ohm
+
 
 # READ I-V DATA AND DIVIDE TO VOLTAGE AND CURRENT LISTS
-
-# Input file contains 4 columns tab separated: time | voltage | time | current
 filename = "iv1"
 voltage, current = readData(filename, rescaleVoltage, rescaleCurrent)
 
-plt.figure(0)  # raw data
+
+# PLOT OF RAW DATA
+plt.figure(0)
 plt.plot(voltage, current)
 
-# SHIFT ALONG Y (CURRENT) AXIS.
-# Selecting the central part of I-V to find max/min Y values for centering.
-# Need to exclude side parts, because they could be higher than central part.
 
-# Select Current(Y) data using Voltage(X) limits. Limits check on init graph.
+# SHIFT ALONG Y (CURRENT) AXIS.
+"""
+Selecting central part of I-V to find max/min Y values for centering.
+Side parts of I-V could be higher than central part, so they are excluded.
+"""
 minX = -1e-4
 maxX = 1e-4
-tempList = selectData(minX, maxX, voltage, current)
-# Shift along Y axis to symmetrical position.
-shift_current = shiftData(tempList, current)
-# Calculate switching current (max current for zero voltage state)
-isw = (abs(max(tempList)) + abs(min(tempList))) / 2
-# Control output after Y-shifting
-print("raw data minY=", min(current), "\nraw data maxY=", max(current),
+
+tempList = selectData(minX, maxX, voltage, current)  # Select Current(Y) data using Voltage(X) limits. Limits are taken from raw graph.
+
+shift_current = shiftData(tempList, current)  # Shift along Y axis to symmetrical position.
+
+isw = (abs(max(tempList)) + abs(min(tempList))) / 2  # Calculate switching current (max current for zero voltage state)
+
+
+# CONTROL AFTER Y-SHIFTING
+print("raw data minY=", min(current), "\nraw data maxY=", max(current), 
       "\nSwitching current=", isw)
 plt.plot(voltage, shift_current)
 
 
 # SHIFT ALONG X (VOLTAGE) AXIS.
-# Select part of Y-shifted data, that has near zero Y values.
-# X-shifting is based only on the position of central vertical I-V line.
+"""
+Select part of Y-shifted data, that has near zero Y values.
+X-shifting is based only on the position of central vertical I-V line.
+"""
 
-# Select Voltage(X) data using Current(Y) limits. Limits should be close to 0.
 minY = -3e-6
 maxY = 3e-6
-tempList = selectData(minY, maxY, shift_current, voltage)
+
+tempList = selectData(minY, maxY, shift_current, voltage)  # Select Voltage(X) data using Current(Y) limits. Limits should be close to 0.
+
 shift_voltage = shiftData(tempList, voltage)  # Shift of X data
-print("minX=", min(tempList), "maxX=", max(tempList))  # Control output
+
+
+# CONTROL AFTER X-SHIFTING
+print("raw data minX=", min(tempList), "\nraw data maxX=", max(tempList))
 plt.plot(shift_voltage, shift_current)  # Final shifted graph
 
-# Resistance calc
+
+# RESISTANCE CALC
 for j in range(len(voltage)):
     resist.append((shift_voltage[j])/(shift_current[j]))
 
+
+# CONTROL PLOT RESISTANCE
 plt.figure(1)  # Resistance vs current
-# plt.axis([-0.00005, 0.00005, -10, 150])  # change graph range
+plt.axis([-0.00005, 0.00005, -10, 150])  # change graph range
 plt.plot(shift_current, resist)
 
 
 # RETRAPPING CURRENT
-
-print("\nRETRAPPING\n")
-# select middle part around zero for finding Xmin Xmax
+"""
+selecting middle part around zero for finding Xmin Xmax
+"""
 tempList = []
 tempList = selectData(minY, maxY, shift_current, shift_voltage)
 
-# "+" branch
+print("\nRETRAPPING")
+
+# "+" BRANCH
 print("\nIr+\n")
-# Selecting range to find minimum current value
 minX = max(tempList)+5e-5
 maxX = 4e-4
 print("minX=", minX, "\tmaxX=", maxX)
+v = []
+c = []
+v, c = selectRetrap(minX, maxX, shift_voltage, shift_current)
+retrapCurrentP = min(c)
 
-# long code
-tempListV = []
-tempListC = []
-for i in range(len(shift_voltage)):
-    if shift_voltage[i] > minX and shift_voltage[i] < maxX:
-        tempListV.append(shift_voltage[i])
-        tempListC.append(shift_current[i])
-retrapCurrentP = min(tempListC)
+# CONTROL OUTPUT
+plt.figure(3)
+plt.plot(v, c, 'bo')
+print("+Ir=:", retrapCurrentP)
 
-plt.figure(2)  # control graph for "+" branch
-plt.plot(tempListV, tempListC, 'bo')
-print("long method\n+Ir=", retrapCurrentP)
 
-# short code
-tempList1 = []
-tempList1 = selectData(minX, maxX, shift_voltage, shift_current)
-print("short method\n +Ir=:", min(tempList1))
-
-# "-" branch
+# "-" BRANCH
 print("\nIr-\n")
 minX = -4e-4
 maxX = min(tempList)-5e-5
 print("minX=", minX, "\tmaxX=", maxX)
+v = []
+c = []
+v, c = selectRetrap(minX, maxX, shift_voltage, shift_current)
+retrapCurrentN = max(c)
 
-# long code
-tempListV1 = []
-tempListC1 = []
-for i in range(len(shift_voltage)):
-    if shift_voltage[i] > minX and shift_voltage[i] < maxX:
-        tempListV1.append(shift_voltage[i])
-        tempListC1.append(shift_current[i])
-retrapCurrentN = max(tempListC1)
 
-plt.figure(3)  # control graph for "-" branch
-plt.plot(tempListV1, tempListC1, 'bo')
-print("long method\n-Ir=", retrapCurrentN)
+# CONTROL OUTPUT
+plt.figure(4)
+plt.plot(v, c, 'bo')
+print("-Ir=:", retrapCurrentN)
 
-# short code
-tempList2 = []
-tempList2 = selectData(minX, maxX, shift_voltage, shift_current)
-print("short method\n -Ir=", max(tempList2))
-
+# MEAN RETRAPPING CURRENT VALUE
 retrap = (abs(retrapCurrentP) + abs(retrapCurrentN)) / 2
 print("\n mean Ir=", retrap)
 
-# Save data in columns "voltage|current|current|resistance"
+# SAVING DATA "voltage|current|current|resistance"
 saveData(filename, shift_voltage, shift_current, resist)
