@@ -99,8 +99,10 @@ voltage, current = readData(filename, rescaleVoltage, rescaleCurrent)
 
 # PLOT OF RAW DATA
 plt.figure(0)
-plt.plot(voltage, current)
-
+plt.plot(voltage, current, label = "raw data")
+plt.legend()
+plt.xlabel('Voltage')
+plt.ylabel('Current')
 
 # SHIFT ALONG Y (CURRENT) AXIS.
 """
@@ -120,8 +122,8 @@ isw = (abs(max(tempList)) + abs(min(tempList))) / 2  # Calculate switching curre
 # CONTROL AFTER Y-SHIFTING
 print("raw data minY=", min(current), "\nraw data maxY=", max(current), 
       "\nSwitching current=", isw)
-plt.plot(voltage, shift_current)
-
+plt.plot(voltage, shift_current, label = "shifted by Y")
+plt.legend()
 
 # SHIFT ALONG X (VOLTAGE) AXIS.
 """
@@ -139,8 +141,8 @@ shift_voltage = shiftData(tempList, voltage)  # Shift of X data
 
 # CONTROL AFTER X-SHIFTING
 print("raw data minX=", min(tempList), "\nraw data maxX=", max(tempList))
-plt.plot(shift_voltage, shift_current)  # Final shifted graph
-
+plt.plot(shift_voltage, shift_current, label = "shifted by X,Y")  # Final shifted graph
+plt.legend()
 
 # RESISTANCE CALC
 for j in range(len(voltage)):
@@ -150,8 +152,10 @@ for j in range(len(voltage)):
 # CONTROL PLOT RESISTANCE
 plt.figure(1)  # Resistance vs current
 plt.axis([-0.00005, 0.00005, -10, 150])  # change graph range
-plt.plot(shift_current, resist)
-
+plt.plot(shift_current, resist, label = "R-I presentation")
+plt.legend()
+plt.xlabel('Current')
+plt.ylabel('Resistance')
 
 # RETRAPPING CURRENT
 """
@@ -174,7 +178,10 @@ retrapCurrentP = min(c)
 
 # CONTROL OUTPUT
 plt.figure(3)
-plt.plot(v, c, 'bo')
+plt.plot(v, c, 'bo', label = "+ branch")
+plt.legend()
+plt.xlabel('Voltage')
+plt.ylabel('Current')
 print("+Ir=:", retrapCurrentP)
 
 
@@ -191,7 +198,10 @@ retrapCurrentN = max(c)
 
 # CONTROL OUTPUT
 plt.figure(4)
-plt.plot(v, c, 'bo')
+plt.plot(v, c, 'bo', label = "- branch")
+plt.legend()
+plt.xlabel('Voltage')
+plt.ylabel('Current')
 print("-Ir=:", retrapCurrentN)
 
 # MEAN RETRAPPING CURRENT VALUE
