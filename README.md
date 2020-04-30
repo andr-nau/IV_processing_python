@@ -5,7 +5,7 @@ My Python project for learning and testing its functionality.
 
 iv1.txt and iv57.txt - experimental raw data for test (different shapes of IV)
 
-This is version dedicated for Python's IDEs, like Spider (to see graphs and outputs).
+There are versions dedicated for Python's IDEs (e.g. Spider, to see graphs and outputs) and Jupiter notebook.
 
 Sample result in graphical form:
 
